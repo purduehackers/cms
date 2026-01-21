@@ -5,6 +5,11 @@ export const ShelterProjects: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
   },
+  access: {
+    read: () => true,
+    create: () => true,
+    update: () => true,
+  },
   fields: [
     {
       name: 'name',
