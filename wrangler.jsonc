@@ -11,6 +11,15 @@
     // see https://developers.cloudflare.com/workers/configuration/compatibility-flags/#global-fetch-strictly-public
     "global_fetch_strictly_public",
   ],
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true,
+    },
+    "traces": {
+      "enabled": false,
+    },
+  },
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS",
@@ -33,7 +42,8 @@
   "r2_buckets": [
     {
       "binding": "R2",
-      "bucket_name": "cms","preview_bucket_name": "cms",
+      "bucket_name": "cms",
+      "preview_bucket_name": "cms",
     },
     // Create a R2 binding with the binding name "NEXT_INC_CACHE_R2_BUCKET"
     // {
