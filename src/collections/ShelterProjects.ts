@@ -6,9 +6,7 @@ export const ShelterProjects: CollectionConfig = {
     useAsTitle: 'name',
   },
   access: {
-    read: () => true,
-    create: () => true,
-    update: () => true,
+    read: (r) => r.req.user || r.data.visible,
   },
   fields: [
     {
