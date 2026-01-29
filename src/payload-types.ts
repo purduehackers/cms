@@ -172,21 +172,7 @@ export interface ShelterProject {
   name: string;
   last_division: string;
   last_owner: string;
-  description: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
+  description: string;
   image: number | Media;
   updatedAt: string;
   createdAt: string;
