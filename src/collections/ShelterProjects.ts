@@ -6,12 +6,7 @@ export const ShelterProjects: CollectionConfig = {
     useAsTitle: 'name',
   },
   access: {
-    read: ({ req }) => {
-      // Admin users can see all projects
-      if (req.user) return true
-      // API requests only see visible projects
-      return { visible: { equals: true } }
-    },
+    read: () => true,
     create: () => true,
     update: () => true,
   },
