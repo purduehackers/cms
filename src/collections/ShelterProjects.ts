@@ -6,11 +6,25 @@ export const ShelterProjects: CollectionConfig = {
     useAsTitle: 'name',
   },
   access: {
-    read: () => true,
+    read: ({ req }) => {
+      // Admin users can see all projects
+      if (req.user) return true
+      // API requests only see visible projects
+      return { visible: { equals: true } }
+    },
     create: () => true,
     update: () => true,
   },
   fields: [
+    {
+      name: 'visible',
+      type: 'checkbox',
+      defaultValue: true,
+      admin: {
+        position: 'sidebar',
+        description: 'Uncheck to hide from the public API',
+      },
+    },
     {
       name: 'name',
       type: 'text',
@@ -28,7 +42,7 @@ export const ShelterProjects: CollectionConfig = {
     },
     {
       name: 'description',
-      type: 'textarea',
+      type: 'richText',
       required: true,
     },
     {

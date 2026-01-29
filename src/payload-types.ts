@@ -165,10 +165,28 @@ export interface Media {
  */
 export interface ShelterProject {
   id: number;
+  /**
+   * Uncheck to hide from the public API
+   */
+  visible?: boolean | null;
   name: string;
   last_division: string;
   last_owner: string;
-  description: string;
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
   image: number | Media;
   updatedAt: string;
   createdAt: string;
@@ -294,6 +312,7 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "shelter-projects_select".
  */
 export interface ShelterProjectsSelect<T extends boolean = true> {
+  visible?: T;
   name?: T;
   last_division?: T;
   last_owner?: T;
