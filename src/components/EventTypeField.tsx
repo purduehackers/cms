@@ -68,7 +68,7 @@ const EventTypeField: TextFieldClientComponent = ({ field, path }) => {
           <TextInput
             path={`${path}-other-text`}
             value={otherText}
-            onChange={(e) => handleOtherTextChange(e as React.ChangeEvent<HTMLInputElement>)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleOtherTextChange(e)}
             onFocus={() => {
               if (selectedValue !== 'other') {
                 handleRadioChange('other')
