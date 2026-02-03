@@ -12,6 +12,18 @@ export const Events: CollectionConfig = {
       required: true,
     },
     {
+      name: 'eventType',
+      type: 'text',
+      label: 'Event Type',
+      defaultValue: 'hack-night',
+      required: true,
+      admin: {
+        components: {
+          Field: '@/components/EventTypeField',
+        },
+      },
+    },
+    {
       name: 'start',
       type: 'date',
       required: true,
@@ -46,6 +58,11 @@ export const Events: CollectionConfig = {
           required: true,
         },
       ],
+    },
+    {
+      name: 'description',
+      type: 'richText',
+      required: true,
     },
   ],
 }

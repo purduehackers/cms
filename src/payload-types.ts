@@ -186,6 +186,7 @@ export interface ShelterProject {
 export interface Event {
   id: number;
   name: string;
+  eventType: string;
   start: string;
   end?: string | null;
   location_name?: string | null;
@@ -197,6 +198,21 @@ export interface Event {
         id?: string | null;
       }[]
     | null;
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -340,6 +356,7 @@ export interface ShelterProjectsSelect<T extends boolean = true> {
  */
 export interface EventsSelect<T extends boolean = true> {
   name?: T;
+  eventType?: T;
   start?: T;
   end?: T;
   location_name?: T;
@@ -351,6 +368,7 @@ export interface EventsSelect<T extends boolean = true> {
         label?: T;
         id?: T;
       };
+  description?: T;
   updatedAt?: T;
   createdAt?: T;
 }
