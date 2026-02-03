@@ -1,6 +1,7 @@
 'use client'
-import React from 'react'
-import { useField, FieldLabel } from '@payloadcms/ui'
+import React, { useId } from 'react'
+import { useField, FieldLabel, TextInput } from '@payloadcms/ui'
+import { Radio } from '@payloadcms/ui/fields/RadioGroup/Radio'
 import type { TextFieldClientComponent } from 'payload'
 
 const options = [
@@ -12,6 +13,7 @@ const options = [
 const EventTypeField: TextFieldClientComponent = ({ field, path }) => {
   const { value, setValue } = useField<string>({ path })
   const [otherText, setOtherText] = React.useState('')
+  const uuid = useId()
 
   const isOther = value && !options.some((opt) => opt.value === value)
   const selectedValue = isOther ? 'other' : value
@@ -39,53 +41,43 @@ const EventTypeField: TextFieldClientComponent = ({ field, path }) => {
   }
 
   return (
-    <div className="field-type text">
+    <div className="field-type radio-group">
       <FieldLabel label={field.label || field.name} path={path} required={field.required} />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
+      <ul className="radio-group--group">
         {options.map((option) => (
-          <label
-            key={option.value}
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
-          >
-            <input
-              type="radio"
-              name={path}
-              value={option.value}
-              checked={selectedValue === option.value}
+          <li key={option.value}>
+            <Radio
+              id={`${path}-${option.value}`}
+              isSelected={selectedValue === option.value}
               onChange={() => handleRadioChange(option.value)}
+              option={option}
+              path={path}
+              uuid={uuid}
             />
-            {option.label}
-          </label>
+          </li>
         ))}
-        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-          <input
-            type="radio"
-            name={path}
-            value="other"
-            checked={selectedValue === 'other'}
+        <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <Radio
+            id={`${path}-other`}
+            isSelected={selectedValue === 'other'}
             onChange={() => handleRadioChange('other')}
+            option={{ label: 'Other:', value: 'other' }}
+            path={path}
+            uuid={uuid}
           />
-          Other:
-          <input
-            type="text"
+          <TextInput
+            path={`${path}-other-text`}
             value={otherText}
-            onChange={handleOtherTextChange}
+            onChange={(e) => handleOtherTextChange(e as React.ChangeEvent<HTMLInputElement>)}
             onFocus={() => {
               if (selectedValue !== 'other') {
                 handleRadioChange('other')
               }
             }}
             placeholder="Enter event type"
-            style={{
-              padding: '4px 8px',
-              border: '1px solid var(--theme-elevation-150)',
-              borderRadius: '4px',
-              background: 'var(--theme-elevation-0)',
-              color: 'var(--theme-elevation-1000)',
-            }}
           />
-        </label>
-      </div>
+        </li>
+      </ul>
     </div>
   )
 }
