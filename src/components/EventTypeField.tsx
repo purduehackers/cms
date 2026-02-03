@@ -12,22 +12,25 @@ const options = [
 
 const EventTypeField: TextFieldClientComponent = ({ field, path }) => {
   const { value, setValue } = useField<string>({ path })
-  const [otherText, setOtherText] = React.useState('')
   const uuid = useId()
 
-  const isOther = value && !options.some((opt) => opt.value === value)
-  const selectedValue = isOther ? 'other' : value
+  // Check if current value is a preset option
+  const isPresetValue = options.some((opt) => opt.value === value)
 
-  React.useEffect(() => {
-    if (isOther && value) {
-      setOtherText(value)
-    }
-  }, [])
+  // Track whether "other" is selected (either explicitly or because value isn't a preset)
+  const [isOtherSelected, setIsOtherSelected] = React.useState(
+    !isPresetValue && value !== undefined,
+  )
+  const [otherText, setOtherText] = React.useState(!isPresetValue ? value || '' : '')
+
+  const selectedValue = isOtherSelected ? 'other' : value
 
   const handleRadioChange = (newValue: string) => {
     if (newValue === 'other') {
-      setValue(otherText || '')
+      setIsOtherSelected(true)
+      setValue(otherText)
     } else {
+      setIsOtherSelected(false)
       setValue(newValue)
     }
   }
@@ -35,9 +38,8 @@ const EventTypeField: TextFieldClientComponent = ({ field, path }) => {
   const handleOtherTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const text = e.target.value
     setOtherText(text)
-    if (selectedValue === 'other') {
-      setValue(text)
-    }
+    setIsOtherSelected(true)
+    setValue(text)
   }
 
   return (
@@ -70,8 +72,9 @@ const EventTypeField: TextFieldClientComponent = ({ field, path }) => {
             value={otherText}
             onChange={handleOtherTextChange}
             onFocus={() => {
-              if (selectedValue !== 'other') {
-                handleRadioChange('other')
+              if (!isOtherSelected) {
+                setIsOtherSelected(true)
+                setValue(otherText)
               }
             }}
             placeholder="Enter event type"
