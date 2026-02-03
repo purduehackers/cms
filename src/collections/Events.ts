@@ -32,7 +32,7 @@ export const Events: CollectionConfig = {
       required: false,
     },
     {
-      name: 'statis',
+      name: 'stats',
       type: 'array',
       fields: [
         {

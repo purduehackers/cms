@@ -190,7 +190,7 @@ export interface Event {
   end?: string | null;
   location_name?: string | null;
   location_url?: string | null;
-  statis?:
+  stats?:
     | {
         data: string;
         label: string;
@@ -344,7 +344,7 @@ export interface EventsSelect<T extends boolean = true> {
   end?: T;
   location_name?: T;
   location_url?: T;
-  statis?:
+  stats?:
     | T
     | {
         data?: T;
