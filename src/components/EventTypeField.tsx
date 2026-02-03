@@ -9,7 +9,7 @@ const options = [
   { label: 'Show', value: 'show' },
 ]
 
-export const EventTypeField: TextFieldClientComponent = ({ field, path }) => {
+const EventTypeField: TextFieldClientComponent = ({ field, path }) => {
   const { value, setValue } = useField<string>({ path })
   const [otherText, setOtherText] = React.useState('')
 
@@ -89,3 +89,5 @@ export const EventTypeField: TextFieldClientComponent = ({ field, path }) => {
     </div>
   )
 }
+
+export default EventTypeField
