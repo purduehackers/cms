@@ -213,6 +213,12 @@ export interface Event {
     };
     [k: string]: unknown;
   };
+  images?:
+    | {
+        image: number | Media;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -369,6 +375,12 @@ export interface EventsSelect<T extends boolean = true> {
         id?: T;
       };
   description?: T;
+  images?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

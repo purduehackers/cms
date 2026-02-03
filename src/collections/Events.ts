@@ -27,11 +27,21 @@ export const Events: CollectionConfig = {
       name: 'start',
       type: 'date',
       required: true,
+      admin: {
+        date: {
+          pickerAppearance: 'dayAndTime',
+        },
+      },
     },
     {
       name: 'end',
       type: 'date',
       required: false,
+      admin: {
+        date: {
+          pickerAppearance: 'dayAndTime',
+        },
+      },
     },
     {
       name: 'location_name',
@@ -63,6 +73,18 @@ export const Events: CollectionConfig = {
       name: 'description',
       type: 'richText',
       required: true,
+    },
+    {
+      name: 'images',
+      type: 'array',
+      fields: [
+        {
+          name: 'image',
+          type: 'upload',
+          relationTo: 'media',
+          required: true,
+        },
+      ],
     },
   ],
 }
