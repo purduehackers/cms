@@ -1,6 +1,6 @@
 'use client'
 import React, { useId } from 'react'
-import { useField, FieldLabel, TextInput } from '@payloadcms/ui'
+import { useField, FieldLabel } from '@payloadcms/ui'
 import { Radio } from '@payloadcms/ui/fields/RadioGroup/Radio'
 import type { TextFieldClientComponent } from 'payload'
 
@@ -65,16 +65,17 @@ const EventTypeField: TextFieldClientComponent = ({ field, path }) => {
             path={path}
             uuid={uuid}
           />
-          <TextInput
-            path={`${path}-other-text`}
+          <input
+            type="text"
             value={otherText}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleOtherTextChange(e)}
+            onChange={handleOtherTextChange}
             onFocus={() => {
               if (selectedValue !== 'other') {
                 handleRadioChange('other')
               }
             }}
             placeholder="Enter event type"
+            className="text-input"
           />
         </li>
       </ul>
