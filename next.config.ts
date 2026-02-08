@@ -12,6 +12,15 @@ const nextConfig = {
 
     return webpackConfig
   },
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/admin',
+        permanent: false,
+      },
+    ]
+  },
 }
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })
