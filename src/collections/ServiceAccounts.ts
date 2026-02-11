@@ -32,6 +32,8 @@ export const ServiceAccounts: CollectionConfig = {
       name: 'revoked',
       label: 'Revoked',
       type: 'checkbox',
+      required: true,
+      defaultValue: false,
       admin: {
         description: 'Check to revoke the API key',
       },

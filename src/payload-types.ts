@@ -310,7 +310,7 @@ export interface ServiceAccount {
   /**
    * Check to revoke the API key
    */
-  revoked?: boolean | null;
+  revoked: boolean;
   roles: ('admin' | 'editor' | 'viewer' | 'sessionsViewer')[];
   updatedAt: string;
   createdAt: string;
