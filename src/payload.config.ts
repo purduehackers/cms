@@ -11,6 +11,7 @@ import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { ShelterProjects } from './collections/ShelterProjects'
 import { Events } from './collections/Events'
+import { Sessions } from './collections/Sessions'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -30,7 +31,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, ShelterProjects, Events],
+  collections: [Users, Media, ShelterProjects, Events, Sessions],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
