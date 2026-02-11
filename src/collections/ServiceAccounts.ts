@@ -6,6 +6,7 @@ export const ServiceAccounts: CollectionConfig = {
   admin: {
     description: 'Service Accounts (API keys)',
     useAsTitle: 'name',
+    group: 'Administration',
   },
   auth: {
     useAPIKey: true,

@@ -5,6 +5,7 @@ export const ShelterProjects: CollectionConfig = {
   slug: 'shelter-projects',
   admin: {
     useAsTitle: 'name',
+    group: 'Content',
   },
   access: {
     read: accessTrySequential(isViewer, () => ({ visible: { equals: true } })),

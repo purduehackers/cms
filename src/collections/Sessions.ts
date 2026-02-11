@@ -6,10 +6,11 @@ export const Sessions: CollectionConfig = {
   admin: {
     description: 'Hack Night sessions',
     useAsTitle: 'title',
+    group: 'Content',
   },
   access: {
-    read: hasAnyRoles("viewer", "sessionsViewer"),
-    readVersions: hasAnyRoles("viewer", "sessionsViewer"),
+    read: hasAnyRoles('viewer', 'sessionsViewer'),
+    readVersions: hasAnyRoles('viewer', 'sessionsViewer'),
     create: isEditor,
     update: isEditor,
     delete: isEditor,
@@ -36,8 +37,9 @@ export const Sessions: CollectionConfig = {
       type: 'checkbox',
       label: 'Publish',
       admin: {
-        description: 'Check this box to make the session public, e.g. visible on the Hack Night dashboard'
-      }
+        description:
+          'Check this box to make the session public, e.g. visible on the Hack Night dashboard',
+      },
     },
     {
       name: 'host',

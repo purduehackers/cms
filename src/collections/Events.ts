@@ -5,6 +5,7 @@ export const Events: CollectionConfig = {
   slug: 'events',
   admin: {
     useAsTitle: 'name',
+    group: 'Content',
   },
   access: {
     read: isViewer,
