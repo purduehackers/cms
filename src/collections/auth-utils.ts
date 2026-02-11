@@ -1,4 +1,4 @@
-import { Access, Field, FieldAccess, SelectFieldManyValidation } from 'payload'
+import { Access, Field, FieldAccess, SelectFieldManyValidation, TypedUser } from 'payload'
 
 interface RoleDef {
   value: string
@@ -76,17 +76,21 @@ export const anyone = () => true
 
 export const nobody = () => false
 
+const isRevoked = (user: TypedUser): boolean =>
+  user.collection === 'service-accounts' && user.revoked
+
 /**
  * Allows any logged-in user to access
  */
-export const loggedIn: Access & FieldAccess = ({ req: { user } }) => Boolean(user)
+export const loggedIn: Access & FieldAccess = ({ req: { user } }) =>
+  Boolean(user) && !isRevoked(user)
 
 /**
  * Allows access to users which have all of the given roles
  */
 export function hasAllRoles(...roles: Role[]): Access & FieldAccess {
   return ({ req: { user } }) => {
-    if (!user) return false
+    if (!user || isRevoked(user)) return false
     const set = new Set(user.roles)
     return roles.every((role) => set.has(role))
   }
@@ -97,7 +101,7 @@ export function hasAllRoles(...roles: Role[]): Access & FieldAccess {
  */
 export function hasAnyRoles(...roles: Role[]): Access & FieldAccess {
   return ({ req: { user } }) => {
-    if (!user) return false
+    if (!user || isRevoked(user)) return false
     const set = new Set(user.roles)
     return roles.some((role) => set.has(role))
   }
@@ -124,6 +128,7 @@ export const isViewer = hasAllRoles('viewer')
  */
 export const adminOrSelf: Access = ({ req: { user } }) => {
   if (user) {
+    if (isRevoked(user)) return false
     if (user.roles?.includes('admin')) return true
     return {
       id: { equals: user.id },
