@@ -64,6 +64,7 @@ export type SupportedTimezones =
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    'service-accounts': ServiceAccountAuthOperations;
   };
   blocks: {};
   collections: {
@@ -72,6 +73,7 @@ export interface Config {
     'shelter-projects': ShelterProject;
     events: Event;
     sessions: Session;
+    'service-accounts': ServiceAccount;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -84,6 +86,7 @@ export interface Config {
     'shelter-projects': ShelterProjectsSelect<false> | ShelterProjectsSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
     sessions: SessionsSelect<false> | SessionsSelect<true>;
+    'service-accounts': ServiceAccountsSelect<false> | ServiceAccountsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -96,9 +99,13 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: null;
-  user: User & {
-    collection: 'users';
-  };
+  user:
+    | (User & {
+        collection: 'users';
+      })
+    | (ServiceAccount & {
+        collection: 'service-accounts';
+      });
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -122,14 +129,36 @@ export interface UserAuthOperations {
     password: string;
   };
 }
+export interface ServiceAccountAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
   id: number;
+  roles: ('admin' | 'editor' | 'viewer' | 'sessionsViewer')[];
   updatedAt: string;
   createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -234,6 +263,10 @@ export interface Session {
   id: number;
   title: string;
   date: string;
+  /**
+   * Check this box to make the session public, e.g. visible on the Hack Night dashboard
+   */
+  published?: boolean | null;
   host: {
     preferred_name: string;
     /**
@@ -264,6 +297,26 @@ export interface Session {
     | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * Service Accounts (API keys)
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "service-accounts".
+ */
+export interface ServiceAccount {
+  id: number;
+  name: string;
+  /**
+   * Check to revoke the API key
+   */
+  revoked?: boolean | null;
+  roles: ('admin' | 'editor' | 'viewer' | 'sessionsViewer')[];
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -308,12 +361,21 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'sessions';
         value: number | Session;
+      } | null)
+    | ({
+        relationTo: 'service-accounts';
+        value: number | ServiceAccount;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: number | User;
+      }
+    | {
+        relationTo: 'service-accounts';
+        value: number | ServiceAccount;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -323,10 +385,15 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: number;
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: number | User;
+      }
+    | {
+        relationTo: 'service-accounts';
+        value: number | ServiceAccount;
+      };
   key?: string | null;
   value?:
     | {
@@ -356,8 +423,12 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  roles?: T;
   updatedAt?: T;
   createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
   email?: T;
   resetPasswordToken?: T;
   resetPasswordExpiration?: T;
@@ -438,6 +509,7 @@ export interface EventsSelect<T extends boolean = true> {
 export interface SessionsSelect<T extends boolean = true> {
   title?: T;
   date?: T;
+  published?: T;
   host?:
     | T
     | {
@@ -453,6 +525,20 @@ export interface SessionsSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "service-accounts_select".
+ */
+export interface ServiceAccountsSelect<T extends boolean = true> {
+  name?: T;
+  revoked?: T;
+  roles?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

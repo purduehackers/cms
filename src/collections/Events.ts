@@ -1,9 +1,17 @@
 import type { CollectionConfig } from 'payload'
+import { isEditor, isViewer } from './auth-utils'
 
 export const Events: CollectionConfig = {
   slug: 'events',
   admin: {
     useAsTitle: 'name',
+  },
+  access: {
+    read: isViewer,
+    readVersions: isViewer,
+    create: isEditor,
+    update: isEditor,
+    delete: isEditor,
   },
   fields: [
     {

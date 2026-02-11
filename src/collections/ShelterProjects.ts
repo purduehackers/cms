@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { accessTrySequential, isEditor, isViewer } from './auth-utils'
 
 export const ShelterProjects: CollectionConfig = {
   slug: 'shelter-projects',
@@ -6,10 +7,11 @@ export const ShelterProjects: CollectionConfig = {
     useAsTitle: 'name',
   },
   access: {
-    read: ({ req }) => {
-      if (req.user) return true
-      return { visible: { equals: true } }
-    },
+    read: accessTrySequential(isViewer, () => ({ visible: { equals: true } })),
+    readVersions: isViewer,
+    create: isEditor,
+    update: isEditor,
+    delete: isEditor,
   },
   fields: [
     {

@@ -1,9 +1,14 @@
 import type { CollectionConfig } from 'payload'
+import { anyone, isEditor, isViewer } from './auth-utils'
 
 export const Media: CollectionConfig = {
   slug: 'media',
   access: {
-    read: () => true,
+    read: anyone,
+    readVersions: isViewer,
+    create: isEditor,
+    update: isEditor,
+    delete: isEditor,
   },
   fields: [
     {

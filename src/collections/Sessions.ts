@@ -1,10 +1,18 @@
 import type { CollectionConfig } from 'payload'
+import { hasAnyRoles, isEditor } from './auth-utils'
 
 export const Sessions: CollectionConfig = {
   slug: 'sessions',
   admin: {
     description: 'Hack Night sessions',
     useAsTitle: 'title',
+  },
+  access: {
+    read: hasAnyRoles("viewer", "sessionsViewer"),
+    readVersions: hasAnyRoles("viewer", "sessionsViewer"),
+    create: isEditor,
+    update: isEditor,
+    delete: isEditor,
   },
   fields: [
     {
@@ -22,6 +30,14 @@ export const Sessions: CollectionConfig = {
         },
       },
       index: true,
+    },
+    {
+      name: 'published',
+      type: 'checkbox',
+      label: 'Publish',
+      admin: {
+        description: 'Check this box to make the session public, e.g. visible on the Hack Night dashboard'
+      }
     },
     {
       name: 'host',
