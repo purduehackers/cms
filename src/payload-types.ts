@@ -71,6 +71,7 @@ export interface Config {
     media: Media;
     'shelter-projects': ShelterProject;
     events: Event;
+    sessions: Session;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -82,6 +83,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     'shelter-projects': ShelterProjectsSelect<false> | ShelterProjectsSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
+    sessions: SessionsSelect<false> | SessionsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -223,6 +225,47 @@ export interface Event {
   createdAt: string;
 }
 /**
+ * Hack Night sessions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sessions".
+ */
+export interface Session {
+  id: number;
+  title: string;
+  date: string;
+  host: {
+    preferred_name: string;
+    /**
+     * The host's Discord ID. This should be a number, not their username.
+     */
+    discord_id?: number | null;
+  };
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  images?:
+    | {
+        image: number | Media;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -261,6 +304,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'events';
         value: number | Event;
+      } | null)
+    | ({
+        relationTo: 'sessions';
+        value: number | Session;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -373,6 +420,29 @@ export interface EventsSelect<T extends boolean = true> {
         data?: T;
         label?: T;
         id?: T;
+      };
+  description?: T;
+  images?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sessions_select".
+ */
+export interface SessionsSelect<T extends boolean = true> {
+  title?: T;
+  date?: T;
+  host?:
+    | T
+    | {
+        preferred_name?: T;
+        discord_id?: T;
       };
   description?: T;
   images?:
