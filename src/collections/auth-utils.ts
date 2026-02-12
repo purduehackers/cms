@@ -48,22 +48,6 @@ export const validateRoles: SelectFieldManyValidation = (roles_) => {
   return true
 }
 
-export const RolesField: Field = {
-  name: 'roles',
-  type: 'select',
-  hasMany: true,
-  required: true,
-  saveToJWT: true,
-  options: [...availableRoles],
-  validate: validateRoles,
-  // FIXME: un-comment after initial admins are granted
-  // access: {
-  //   create: isAdmin,
-  //   update: isAdmin,
-  //   read: anyone,
-  // },
-}
-
 /**
  * Allows anyone to access, **including non-logged-in users!**
  *
@@ -154,4 +138,20 @@ export function accessTrySequential(first: Access, ...rest: Access[]): Access {
     }
     return result
   }
+}
+
+export const RolesField: Field = {
+  name: 'roles',
+  type: 'select',
+  hasMany: true,
+  required: true,
+  saveToJWT: true,
+  options: [...availableRoles],
+  validate: validateRoles,
+  // FIXME: un-comment after initial admins are granted
+  access: {
+    create: isAdmin,
+    update: isAdmin,
+    read: anyone,
+  },
 }
