@@ -266,7 +266,7 @@ export interface Session {
   /**
    * Check this box to make the session public, e.g. visible on the Hack Night dashboard
    */
-  published?: boolean | null;
+  published: boolean;
   host: {
     preferred_name: string;
     /**

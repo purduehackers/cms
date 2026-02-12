@@ -36,6 +36,8 @@ export const Sessions: CollectionConfig = {
       name: 'published',
       type: 'checkbox',
       label: 'Publish',
+      required: true,
+      defaultValue: false,
       admin: {
         description:
           'Check this box to make the session public, e.g. visible on the Hack Night dashboard',
