@@ -272,7 +272,7 @@ export interface Session {
     /**
      * The host's Discord ID. This should be a number, not their username.
      */
-    discord_id?: number | null;
+    discord_id?: string | null;
   };
   description: {
     root: {

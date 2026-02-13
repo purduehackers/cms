@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, TextFieldSingleValidation } from 'payload'
 import { hasAnyRoles, isEditor } from './auth-utils'
 
 export const Sessions: CollectionConfig = {
@@ -57,7 +57,9 @@ export const Sessions: CollectionConfig = {
         {
           name: 'discord_id',
           label: 'Discord ID',
-          type: 'number',
+          type: 'text',
+          validate: ((value) =>
+            /^[0-9]+$/.test(value) || 'Must be a number') satisfies TextFieldSingleValidation,
           admin: {
             description: "The host's Discord ID. This should be a number, not their username.",
           },
