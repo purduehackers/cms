@@ -1,5 +1,5 @@
 import type { CollectionConfig } from 'payload'
-import { isEditor, isViewer } from './auth-utils'
+import { accessTrySequential, isEditor, isViewer } from './auth-utils'
 
 export const Events: CollectionConfig = {
   slug: 'events',
@@ -8,7 +8,7 @@ export const Events: CollectionConfig = {
     group: 'Content',
   },
   access: {
-    read: isViewer,
+    read: accessTrySequential(isViewer, () => ({ published: { equals: true } })),
     readVersions: isViewer,
     create: isEditor,
     update: isEditor,
@@ -19,6 +19,15 @@ export const Events: CollectionConfig = {
       name: 'name',
       type: 'text',
       required: true,
+    },
+    {
+      name: 'published',
+      type: 'checkbox',
+      required: true,
+      defaultValue: false,
+      admin: {
+        description: 'Controls whether the event information is public (will show on events site)',
+      },
     },
     {
       name: 'eventType',

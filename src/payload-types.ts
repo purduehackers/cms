@@ -217,6 +217,10 @@ export interface ShelterProject {
 export interface Event {
   id: number;
   name: string;
+  /**
+   * Controls whether the event information is public (will show on events site)
+   */
+  published: boolean;
   eventType: string;
   start: string;
   end?: string | null;
@@ -480,6 +484,7 @@ export interface ShelterProjectsSelect<T extends boolean = true> {
  */
 export interface EventsSelect<T extends boolean = true> {
   name?: T;
+  published?: T;
   eventType?: T;
   start?: T;
   end?: T;
