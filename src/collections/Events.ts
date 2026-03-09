@@ -1,5 +1,5 @@
 import type { CollectionConfig } from 'payload'
-import { accessTrySequential, isEditor, isViewer } from './auth-utils'
+import { hasAnyRoles, isEditor } from './auth-utils'
 
 export const Events: CollectionConfig = {
   slug: 'events',
@@ -8,8 +8,8 @@ export const Events: CollectionConfig = {
     group: 'Content',
   },
   access: {
-    read: accessTrySequential(isViewer, () => ({ published: { equals: true } })),
-    readVersions: isViewer,
+    read: hasAnyRoles('viewer', 'eventsViewer'),
+    readVersions: hasAnyRoles('viewer', 'eventsViewer'),
     create: isEditor,
     update: isEditor,
     delete: isEditor,

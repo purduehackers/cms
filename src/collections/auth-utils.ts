@@ -24,6 +24,10 @@ export const availableRoles = [
     value: 'sessionsViewer',
     label: 'Viewer (sessions only)',
   },
+  {
+    value: 'eventsViewer',
+    label: 'Viewer (events only)',
+  }
 ] as const satisfies Readonly<RoleDef[]>
 const availableRoleMap = Object.fromEntries(
   availableRoles.map((role) => [role.value, role]),

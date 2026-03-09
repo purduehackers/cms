@@ -153,7 +153,7 @@ export interface ServiceAccountAuthOperations {
  */
 export interface User {
   id: number;
-  roles: ('admin' | 'editor' | 'viewer' | 'sessionsViewer')[];
+  roles: ('admin' | 'editor' | 'viewer' | 'sessionsViewer' | 'eventsViewer')[];
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
@@ -315,7 +315,7 @@ export interface ServiceAccount {
    * Check to revoke the API key
    */
   revoked: boolean;
-  roles: ('admin' | 'editor' | 'viewer' | 'sessionsViewer')[];
+  roles: ('admin' | 'editor' | 'viewer' | 'sessionsViewer' | 'eventsViewer')[];
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
