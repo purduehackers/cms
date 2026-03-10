@@ -26,6 +26,27 @@ try {
     console.error("Images directory not found.");
 }
 
+// Update alt of existing image, given id
+async function updateImageAlt(mediaId: number) {
+    const res = await fetch(`${CMS_URL}/api/media/${mediaId}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `users API-Key ${API_KEY}`,
+        },
+        body: JSON.stringify({
+            alt: "new alt text",
+        }),
+    });
+
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Failed to patch media: ${text}`);
+    }
+    const updated = await res.json();
+    console.log("Updated media:", updated);
+}
+
 const files = await fs.readdir(imagesDir);
 const imageMapFilePath = path.join(__dirname, "imageMap.json");
 const imageMap: Record<string, number> = {}; // map image file name to id in db
@@ -62,7 +83,22 @@ async function uploadImage(file: string) {
                 headers: {
                     "Authorization": `users API-Key ${API_KEY}`
                 },
-                body: form
+                body: form,
+                /*body: JSON.stringify({
+                    form,
+                    alt: "Event image",
+                }),*/
+                /*body: JSON.stringify({
+                    file: {
+                        data: new Uint8Array(data) as unknown as Buffer,
+                        name: file,
+                        mimetype: "image/jpeg",
+                        size: data.length
+                    },
+                    data: {
+                        alt: "event image"
+                    }
+                })*/
             });
             if (!res.ok) {
                 const text = await res.text();
