@@ -1,3 +1,4 @@
+import "dotenv/config"
 import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -8,9 +9,15 @@ import config from "../src/payload.config";
 const payload = await getPayload({ config });
 const limit = pLimit(5); // limit to 5 concurrent uploads
 
+const LOCAL_API = false;
+const DEPLOY_TO_PROD = false;
+const TEST_BATCH = true;
+const CMS_URL = DEPLOY_TO_PROD ? "https://cms.purduehackers.com" : "http://localhost:3000";
+const API_KEY = DEPLOY_TO_PROD ? process.env.API_KEY : process.env.API_KEY_DEV;
+
 // Get directory of current script
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const imagesDir = path.join(__dirname, "images");
+const imagesDir = path.join(__dirname, TEST_BATCH ? "images-test" : "images");
 
 // Ensure images directory exists
 try {
@@ -21,29 +28,75 @@ try {
 
 const files = await fs.readdir(imagesDir);
 const imageMapFilePath = path.join(__dirname, "imageMap.json");
-const imageMap: Record<string, number> = {};
+const imageMap: Record<string, number> = {}; // map image file name to id in db
 
 let fileNum = 1;
+
+// Read image file and upload to Payload CMS
 async function uploadImage(file: string) {
     console.log(`[${fileNum++}/${files.length}] starting upload...`);
     const filepath = path.join(imagesDir, file);
     const data = await fs.readFile(filepath); // buffer with binary image data
 
-    const mediaDoc = await payload.create({
-        collection: "media",
-        file: {
-            data: new Uint8Array(data) as unknown as Buffer,
-            name: file,
-            mimetype: "image/jpeg",
-            size: data.length
-        },
-        data: {
-            alt: "event image"
+    let imageId; // save for mapping later
+    if (!LOCAL_API) {
+        // Use http request to write to deployed cms
+        if (!API_KEY) {
+            throw new Error("API key not provided");
         }
-    });
 
-    imageMap[file] = mediaDoc.id;
-    console.log(`[success] uploaded ${file} with ID ${mediaDoc.id}`);
+        const blob = new Blob([data], { type: "image/jpeg" });
+
+        // Use multipart form data to upload media
+        const form = new FormData();
+        form.append("file", blob, file);
+        form.append("alt", "event image");
+        /*form.append("data", JSON.stringify({
+            alt: "event image"
+        }));*/
+        console.log(form)
+
+        try {
+            const res = await fetch(`${CMS_URL}/api/media`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `users API-Key ${API_KEY}`
+                },
+                body: form
+            });
+            if (!res.ok) {
+                const text = await res.text();
+                console.error("Upload failed:", res.status, text);
+                throw new Error(`Upload failed (${res.status})`);
+            }
+            const json: any = await res.json();
+            console.log(json)
+            imageId = json.doc.id;
+        } catch (error) {
+            console.log(`Error uploading image #${fileNum}: ${error}`);
+        }
+    } else {
+        // Use local API to test with dev db
+        const mediaDoc = await payload.create({
+            collection: "media",
+            file: {
+                data: new Uint8Array(data) as unknown as Buffer,
+                name: file,
+                mimetype: "image/jpeg",
+                size: data.length
+            },
+            data: {
+                alt: "event image"
+            }
+        });
+        imageId = mediaDoc.id;
+    }
+
+    if (!imageId) {
+        throw new Error(`Upload failed for ${file}`);
+    }
+    imageMap[file] = imageId;
+    console.log(`[success] uploaded ${file} with ID ${imageId}`);
 }
 
 // Read and upload image files concurrently
