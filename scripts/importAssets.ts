@@ -4,6 +4,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import pLimit from 'p-limit'
 import { getPayload } from 'payload'
+
 import config from '../src/payload.config'
 
 const payload = await getPayload({ config })
