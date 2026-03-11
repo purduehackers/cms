@@ -181,7 +181,7 @@ export interface User {
  */
 export interface Media {
   id: number;
-  alt?: string | null;
+  alt: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
