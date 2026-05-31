@@ -277,6 +277,18 @@ export const Events: CollectionConfig = {
 
         return doc
       },
+      async () => {
+        // Trigger ISR revalidation for Events Site
+        const res = await fetch('https://events.purduehackers.com', {
+          method: 'HEAD',
+          headers: {
+            'x-prerender-revalidate': process.env.ISR_REVALIDATION_TOKEN,
+          },
+        })
+
+        const wasInvalidated = res.headers.get('X-Vercel-Cache') === 'REVALIDATED'
+        return new Response(JSON.stringify({ wasInvalidated }))
+      },
     ] satisfies CollectionAfterChangeHook<Event>[],
   },
 }
