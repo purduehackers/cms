@@ -277,9 +277,15 @@ export const Events: CollectionConfig = {
 
         return doc
       },
-      async () => {
+      async ({ doc }) => {
         // Trigger ISR revalidation for Events Site
-        const res = await fetch('https://events.purduehackers.com', {
+        await fetch('https://events.purduehackers.com', {
+          method: 'GET',
+          headers: {
+            'x-prerender-revalidate': process.env.ISR_REVALIDATION_TOKEN || '',
+          },
+        })
+        await fetch(`https://events.purduehackers.com/events/${doc.id}`, {
           method: 'GET',
           headers: {
             'x-prerender-revalidate': process.env.ISR_REVALIDATION_TOKEN || '',
