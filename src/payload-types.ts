@@ -259,6 +259,10 @@ export interface Event {
   id: number;
   name: string;
   /**
+   * Optional URL-friendly slug. Automatically generated from the event name when created.
+   */
+  slug?: string | null;
+  /**
    * Controls whether the event information is public (will show on events site)
    */
   published: boolean;
@@ -751,6 +755,7 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface EventsSelect<T extends boolean = true> {
   name?: T;
+  slug?: T;
   published?: T;
   eventType?: T;
   start?: T;

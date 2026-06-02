@@ -1,7 +1,20 @@
-import type { CollectionAfterChangeHook, CollectionConfig } from 'payload'
+import type {
+  CollectionAfterChangeHook,
+  CollectionBeforeChangeHook,
+  CollectionConfig,
+} from 'payload'
 import { hasAnyRoles, isEditor } from './auth-utils'
 import { renderEmailTemplate } from '@/emails/EmailTemplate'
 import { Event } from '@/payload-types'
+
+function createSlugFromName(name: string) {
+  return name
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+}
 
 // Helper for formatting text indicating how long until event occurs
 export function getTimeUntilText(start?: Date | null) {
@@ -100,6 +113,16 @@ export const Events: CollectionConfig = {
       name: 'name',
       type: 'text',
       required: true,
+    },
+    {
+      name: 'slug',
+      type: 'text',
+      required: false,
+      unique: true,
+      admin: {
+        description:
+          'Optional URL-friendly slug. Automatically generated from the event name when created.',
+      },
     },
     {
       name: 'published',
@@ -205,6 +228,23 @@ export const Events: CollectionConfig = {
     },
   ],
   hooks: {
+    beforeChange: [
+      async ({ originalDoc, operation, data }) => {
+        if (operation !== 'create') {
+          return data
+        }
+
+        const name = data?.name || originalDoc?.name
+        if (!name || data?.slug) {
+          return data
+        }
+
+        return {
+          ...data,
+          slug: createSlugFromName(name),
+        }
+      },
+    ] satisfies CollectionBeforeChangeHook<Event>[],
     afterChange: [
       async ({ doc, req, context }) => {
         // Skip sending email if conditions not met
