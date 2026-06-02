@@ -7,13 +7,29 @@ import { hasAnyRoles, isEditor } from './auth-utils'
 import { renderEmailTemplate } from '@/emails/EmailTemplate'
 import { Event } from '@/payload-types'
 
-function createSlugFromName(name: string) {
-  return name
+function createSlugFromName(name: string, eventType?: string) {
+  let slug = name
     .toLowerCase()
     .normalize('NFKD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '')
+
+  // Remove eventType if it appears at the end of the slug
+  if (eventType) {
+    const typeSlug = eventType
+      .toLowerCase()
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '')
+
+    if (typeSlug && slug.endsWith(`-${typeSlug}`)) {
+      slug = slug.slice(0, -(typeSlug.length + 1))
+    }
+  }
+
+  return slug
 }
 
 // Helper for formatting text indicating how long until event occurs
@@ -235,13 +251,14 @@ export const Events: CollectionConfig = {
         }
 
         const name = data?.name || originalDoc?.name
+        const eventType = data?.eventType || originalDoc?.eventType
         if (!name || data?.slug) {
           return data
         }
 
         return {
           ...data,
-          slug: createSlugFromName(name),
+          slug: createSlugFromName(name, eventType),
         }
       },
     ] satisfies CollectionBeforeChangeHook<Event>[],
