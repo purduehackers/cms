@@ -259,7 +259,7 @@ export interface Event {
   id: number;
   name: string;
   /**
-   * Optional URL-friendly slug. Automatically generated from the event name when created.
+   * URL-friendly slug. Must be unique.
    */
   slug?: string | null;
   /**

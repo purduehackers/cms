@@ -2,30 +2,26 @@ import type {
   CollectionAfterChangeHook,
   CollectionBeforeChangeHook,
   CollectionConfig,
+  TextFieldValidation,
 } from 'payload'
 import { hasAnyRoles, isEditor } from './auth-utils'
 import { renderEmailTemplate } from '@/emails/EmailTemplate'
 import { Event } from '@/payload-types'
 
-function createSlugFromName(name: string, eventType?: string) {
+export function createSlugFromName(name: string, eventType?: string) {
   let slug = name
     .toLowerCase()
     .normalize('NFKD')
     .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/[^a-z0-9.]+/g, '-')
     .replace(/(^-|-$)/g, '')
 
-  // Remove eventType if it appears at the end of the slug
-  if (eventType) {
-    const typeSlug = eventType
-      .toLowerCase()
-      .normalize('NFKD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '')
-
-    if (typeSlug && slug.endsWith(`-${typeSlug}`)) {
-      slug = slug.slice(0, -(typeSlug.length + 1))
+  // Remove hack night and workshop eventTypes from slug
+  if (eventType == 'hack-night' || eventType == 'workshop') {
+    if (slug.includes(`-${eventType}`)) {
+      slug = slug.replace(`-${eventType}`, '')
+    } else if (slug.includes(`${eventType}-`)) {
+      slug = slug.replace(`${eventType}-`, '')
     }
   }
 
@@ -135,9 +131,37 @@ export const Events: CollectionConfig = {
       type: 'text',
       required: false,
       unique: true,
+      validate: async (
+        slug: Parameters<TextFieldValidation>[0],
+        options: Parameters<TextFieldValidation>[1],
+      ) => {
+        if (!slug) return true
+
+        const id = options?.id
+        const req = options?.req
+        if (!req) return true
+
+        const results = await req.payload.find({
+          collection: 'events',
+          depth: 0,
+          limit: 1,
+          pagination: false,
+          overrideAccess: true,
+          where: {
+            slug: {
+              equals: slug,
+            },
+          },
+        })
+
+        const existing = results.docs?.[0]
+        if (!existing) return true
+        if (id !== undefined && String(existing.id) === String(id)) return true
+
+        return 'Slug must be unique. Another event already uses this slug.'
+      },
       admin: {
-        description:
-          'Optional URL-friendly slug. Automatically generated from the event name when created.',
+        description: 'URL-friendly slug. Must be unique.',
       },
     },
     {
@@ -246,9 +270,9 @@ export const Events: CollectionConfig = {
   hooks: {
     beforeChange: [
       async ({ originalDoc, operation, data }) => {
-        if (operation !== 'create') {
+        /*if (operation !== 'create') {
           return data
-        }
+        }*/
 
         const name = data?.name || originalDoc?.name
         const eventType = data?.eventType || originalDoc?.eventType
