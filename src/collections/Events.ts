@@ -161,7 +161,8 @@ export const Events: CollectionConfig = {
         return 'Slug must be unique. Another event already uses this slug.'
       },
       admin: {
-        description: 'URL-friendly slug. Must be unique.',
+        description:
+          'Unique URL-friendly slug. Required but it will attempt to autogenerate if you submit empty.',
       },
     },
     {
@@ -269,11 +270,7 @@ export const Events: CollectionConfig = {
   ],
   hooks: {
     beforeChange: [
-      async ({ originalDoc, operation, data }) => {
-        /*if (operation !== 'create') {
-          return data
-        }*/
-
+      async ({ originalDoc, data }) => {
         const name = data?.name || originalDoc?.name
         const eventType = data?.eventType || originalDoc?.eventType
         if (!name || data?.slug) {
