@@ -2,10 +2,12 @@ import type {
   CollectionAfterChangeHook,
   CollectionBeforeChangeHook,
   CollectionConfig,
+  PayloadRequest,
   TextFieldValidation,
 } from 'payload'
 import { hasAnyRoles, isEditor } from './auth-utils'
 import { renderEmailTemplate } from '@/emails/EmailTemplate'
+import { formatEventStart } from '@/emails/format'
 import { Event } from '@/payload-types'
 
 export function createSlugFromName(name: string, eventType?: string) {
@@ -26,6 +28,15 @@ export function createSlugFromName(name: string, eventType?: string) {
   }
 
   return slug
+}
+
+export const EVENTS_SITE_URL = 'https://events.purduehackers.com'
+
+// Public page URL for an event on the events site. The site routes events as
+// /events/<category-slug>/<slug> — an id-based URL 404s over there.
+export function getEventPageUrl(eventDoc: Pick<Event, 'eventType' | 'slug'>) {
+  const catSlug = (eventDoc.eventType || 'other').replaceAll(' ', '-').toLowerCase()
+  return `${EVENTS_SITE_URL}/events/${catSlug}/${eventDoc.slug}`
 }
 
 // Helper for formatting text indicating how long until event occurs
@@ -80,16 +91,7 @@ async function getEmailData(eventDoc: Event) {
   const eventName = eventDoc.name || 'your Purdue Hackers event'
   const start = eventDoc.start ? new Date(eventDoc.start) : null
   const timeUntilText = getTimeUntilText(start)
-  const startTextFormatter = new Intl.DateTimeFormat('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    timeZoneName: 'short',
-    timeZone: 'America/New_York',
-  })
-  const startText = startTextFormatter.format(start)
+  const startText = formatEventStart(start)
   const subject = `Reminder: ${eventName} is happening ${timeUntilText}!`
   const heading = `${eventName} is happening ${timeUntilText}!`
   const text = getEventReminderText(eventName, startText, timeUntilText, eventDoc.location_name)
@@ -101,10 +103,66 @@ async function getEmailData(eventDoc: Event) {
     body: text,
     locationName: eventDoc.location_name,
     locationUrl: eventDoc.location_url,
-    ctaUrl: `https://events.purduehackers.com/events/${eventDoc.id}`,
+    ctaUrl: getEventPageUrl(eventDoc),
   })
 
   return { subject, text, html }
+}
+
+// Sends the event's reminder email to every active RSVP (bcc) and records it
+// in the emails collection. Shared by the manual "send" checkbox hook and the
+// /send-reminders endpoint.
+async function sendEventBlast(req: PayloadRequest, doc: Event): Promise<number> {
+  const rsvpResults = await req.payload.find({
+    collection: 'rsvps',
+    depth: 0,
+    limit: 0,
+    pagination: false,
+    overrideAccess: false,
+    req,
+    select: {
+      email: true,
+    },
+    where: {
+      and: [
+        { event: { equals: doc.id } },
+        { unsubscribed: { equals: false } },
+        { cancelled: { not_equals: true } },
+      ],
+    },
+  })
+
+  const recipients = rsvpResults.docs
+    .map((rsvp) => rsvp.email)
+    .filter((email) => typeof email === 'string' && email.trim())
+
+  const emailInfo = await getEmailData(doc)
+  if (recipients.length > 0 && emailInfo) {
+    await req.payload.sendEmail({
+      to: 'events@purduehackers.com',
+      bcc: recipients,
+      subject: emailInfo.subject,
+      text: emailInfo.text,
+      html: emailInfo.html,
+    })
+  }
+
+  // Create new corresponding Payload email object
+  await req.payload.create({
+    collection: 'emails',
+    data: {
+      event: doc.id,
+      subject: emailInfo?.subject,
+      body: emailInfo?.text,
+    },
+    overrideAccess: false,
+    req,
+    context: {
+      skipEmailSend: true,
+    },
+  })
+
+  return recipients.length
 }
 
 export const Events: CollectionConfig = {
@@ -267,6 +325,66 @@ export const Events: CollectionConfig = {
         description: 'When email was last sent.',
       },
     },
+    {
+      name: 'remindersSent',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        hidden: true,
+        description:
+          'Set by the events site reminder cron once T-1-day reminders have gone out. Idempotence guard.',
+      },
+    },
+  ],
+  endpoints: [
+    {
+      // T-1-day reminders, triggered by the events site's hourly cron. The
+      // whole pipeline lives here so it reuses the blast composer/template
+      // and the emails audit log; remindersSent keeps it idempotent.
+      path: '/send-reminders',
+      method: 'post',
+      handler: async (req) => {
+        const allowed = hasAnyRoles('editor', 'events_website')({ req })
+        if (allowed !== true) {
+          return Response.json({ error: 'Unauthorized' }, { status: 401 })
+        }
+
+        const now = Date.now()
+        const due = await req.payload.find({
+          collection: 'events',
+          where: {
+            and: [
+              { published: { equals: true } },
+              { start: { greater_than: new Date(now + 23 * 3600_000).toISOString() } },
+              { start: { less_than: new Date(now + 24 * 3600_000).toISOString() } },
+              { remindersSent: { not_equals: true } },
+            ],
+          },
+          limit: 10,
+          overrideAccess: true,
+        })
+
+        const processed = []
+        for (const event of due.docs) {
+          try {
+            const recipients = await sendEventBlast(req, event)
+            await req.payload.update({
+              collection: 'events',
+              id: event.id,
+              data: { remindersSent: true },
+              overrideAccess: true,
+              context: { skipEmailSend: true },
+            })
+            processed.push({ event: event.slug, recipients })
+          } catch (err) {
+            console.error('Reminder send failed for', event.slug, err)
+            processed.push({ event: event.slug, error: true })
+          }
+        }
+
+        return Response.json({ eventsInWindow: due.totalDocs, processed })
+      },
+    },
   ],
   hooks: {
     beforeChange: [
@@ -291,52 +409,7 @@ export const Events: CollectionConfig = {
           return doc
         }
 
-        // All RSVPs for this event
-        const rsvpResults = await req.payload.find({
-          collection: 'rsvps',
-          depth: 0,
-          limit: 0,
-          pagination: false,
-          overrideAccess: false,
-          req,
-          select: {
-            email: true,
-          },
-          where: {
-            and: [{ event: { equals: doc.id } }, { unsubscribed: { equals: false } }],
-          },
-        })
-
-        const recipients = rsvpResults.docs
-          .map((rsvp) => rsvp.email)
-          .filter((email) => typeof email === 'string' && email.trim())
-
-        // Send email blast
-        const emailInfo = await getEmailData(doc)
-        if (recipients.length > 0 && emailInfo) {
-          await req.payload.sendEmail({
-            to: 'events@purduehackers.com',
-            bcc: recipients,
-            subject: emailInfo.subject,
-            text: emailInfo.text,
-            html: emailInfo.html,
-          })
-        }
-
-        // Create new corresponding Payload email object
-        await req.payload.create({
-          collection: 'emails',
-          data: {
-            event: doc.id,
-            subject: emailInfo?.subject,
-            body: emailInfo?.text,
-          },
-          overrideAccess: false,
-          req,
-          context: {
-            skipEmailSend: true,
-          },
-        })
+        await sendEventBlast(req, doc)
 
         // Set send to false, update last sent field
         await req.payload.update({
@@ -355,20 +428,24 @@ export const Events: CollectionConfig = {
 
         return doc
       },
-      async ({ doc }) => {
-        // Trigger ISR revalidation for Events Site
-        await fetch('https://events.purduehackers.com', {
-          method: 'GET',
-          headers: {
-            'x-prerender-revalidate': process.env.ISR_REVALIDATION_TOKEN || '',
-          },
-        })
-        await fetch(`https://events.purduehackers.com/events/${doc.id}`, {
-          method: 'GET',
-          headers: {
-            'x-prerender-revalidate': process.env.ISR_REVALIDATION_TOKEN || '',
-          },
-        })
+      async ({ doc, context }) => {
+        // Internal update cascades (send/sentAt/remindersSent) don't change
+        // public content — don't revalidate twice per save
+        if (context?.skipEmailSend) return
+
+        // Trigger ISR revalidation for the events site: the home page and the
+        // event's real (slugged) page. Never fail the save over it.
+        const routes = ['', new URL(getEventPageUrl(doc)).pathname]
+        await Promise.allSettled(
+          routes.map((route) =>
+            fetch(`${EVENTS_SITE_URL}${route}`, {
+              method: 'HEAD',
+              headers: {
+                'x-prerender-revalidate': process.env.ISR_REVALIDATION_TOKEN || '',
+              },
+            }),
+          ),
+        )
       },
     ] satisfies CollectionAfterChangeHook<Event>[],
   },
