@@ -250,6 +250,32 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    gallery?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -259,7 +285,7 @@ export interface Event {
   id: number;
   name: string;
   /**
-   * URL-friendly slug. Must be unique.
+   * Unique URL-friendly slug. Required but it will attempt to autogenerate if you submit empty.
    */
   slug?: string | null;
   /**
@@ -307,6 +333,10 @@ export interface Event {
    * When email was last sent.
    */
   sentAt?: string | null;
+  /**
+   * Set by the events site reminder cron once T-1-day reminders have gone out. Idempotence guard.
+   */
+  remindersSent?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -346,6 +376,12 @@ export interface Rsvp {
    * Designates whether owner of this email has unsubscribed from further notifs.
    */
   unsubscribed?: boolean | null;
+  cancelToken?: string | null;
+  /**
+   * Guest cancelled via their emailed cancel link.
+   */
+  cancelled?: boolean | null;
+  cancelledAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -495,6 +531,11 @@ export interface Search {
         relationTo: 'hack-night-sessions';
         value: number | HackNightSession;
       };
+  eventSlug?: string | null;
+  eventType?: string | null;
+  start?: string | null;
+  published?: boolean | null;
+  excerpt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -748,6 +789,40 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        gallery?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -778,6 +853,7 @@ export interface EventsSelect<T extends boolean = true> {
       };
   send?: T;
   sentAt?: T;
+  remindersSent?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -803,6 +879,9 @@ export interface RsvpsSelect<T extends boolean = true> {
   name?: T;
   event?: T;
   unsubscribed?: T;
+  cancelToken?: T;
+  cancelled?: T;
+  cancelledAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -883,6 +962,11 @@ export interface SearchSelect<T extends boolean = true> {
   title?: T;
   priority?: T;
   doc?: T;
+  eventSlug?: T;
+  eventType?: T;
+  start?: T;
+  published?: T;
+  excerpt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

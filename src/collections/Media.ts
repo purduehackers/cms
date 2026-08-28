@@ -73,5 +73,16 @@ export const Media: CollectionConfig = {
       },
     },
   ],
-  upload: true,
+  upload: {
+    // Originals are kept untouched; generated sizes are webp. The events site
+    // uses `thumbnailURL` (from adminThumbnail) and falls back to the original
+    // when a doc predates these sizes — run scripts/regenerate-media-sizes.ts
+    // to backfill existing media.
+    imageSizes: [
+      { name: 'thumbnail', width: 240, height: 240, position: 'centre', formatOptions: { format: 'webp' } },
+      { name: 'card', width: 640, formatOptions: { format: 'webp' } },
+      { name: 'gallery', width: 1200, formatOptions: { format: 'webp' } },
+    ],
+    adminThumbnail: 'thumbnail',
+  },
 }
