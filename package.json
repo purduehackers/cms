@@ -17,7 +17,7 @@
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "reinstall": "rm -rf node_modules bun.lock && bun install",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
-    "ci": "payload migrate && bun run build"
+    "ci": "if [ \"$VERCEL_ENV\" = \"production\" ]; then payload migrate; fi && bun run build"
   },
   "dependencies": {
     "@libsql/client": "^0.15.0",
