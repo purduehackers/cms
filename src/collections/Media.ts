@@ -16,9 +16,11 @@ export const Media: CollectionConfig = {
         return true
       }
       if (hasAnyRoles('wack_hacker')(args)) {
+        // The bot may only remove what it uploaded: an ❌ reaction in a drop
+        // thread deletes that message's media, and nothing else.
         return {
           source: {
-            equals: 'hack-night',
+            in: ['hack-night', 'discord-drop'],
           },
         }
       }
@@ -40,7 +42,7 @@ export const Media: CollectionConfig = {
       },
       admin: {
         description:
-          'Groups media uploaded in the same batch (e.g. a hack-night UUID). Filter by this to bulk-attach into events.images[].',
+          'Groups media uploaded in the same batch: a hack-night date slug, or the slug of the event an /image-drop thread files to. Filter by this to bulk-attach into events.images[].',
       },
     },
     {
@@ -65,6 +67,7 @@ export const Media: CollectionConfig = {
       options: [
         { value: 'manual', label: 'Manual' },
         { value: 'hack-night', label: 'Hack Night (bot)' },
+        { value: 'discord-drop', label: 'Discord Image Drop (bot)' },
       ],
       defaultValue: 'manual',
       index: true,
