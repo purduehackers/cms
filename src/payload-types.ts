@@ -233,12 +233,12 @@ export interface Media {
   id: number;
   alt: string;
   /**
-   * Groups media uploaded in the same batch (e.g. a hack-night UUID). Filter by this to bulk-attach into events.images[].
+   * Groups media uploaded in the same batch: a hack-night date slug, or the slug of the event an /image-drop thread files to. Filter by this to bulk-attach into events.images[].
    */
   batchId?: string | null;
   discordMessageId?: string | null;
   discordUserId?: string | null;
-  source?: ('manual' | 'hack-night') | null;
+  source?: ('manual' | 'hack-night' | 'discord-drop') | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
