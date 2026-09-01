@@ -139,7 +139,9 @@ async function sendEventBlast(req: PayloadRequest, doc: Event): Promise<number> 
   const emailInfo = await getEmailData(doc)
   if (recipients.length > 0 && emailInfo) {
     await req.payload.sendEmail({
-      to: 'events@purduehackers.com',
+      // Real recipients are bcc'd, so the To is only the copy we keep. It has to
+      // be an address Email Routing delivers, or that copy goes nowhere.
+      to: 'team@purduehackers.com',
       bcc: recipients,
       subject: emailInfo.subject,
       text: emailInfo.text,

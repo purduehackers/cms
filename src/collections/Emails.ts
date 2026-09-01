@@ -117,7 +117,10 @@ export const Emails: CollectionConfig = {
         // Send email blast
         if (recipients.length > 0) {
           await req.payload.sendEmail({
-            to: 'events@purduehackers.com',
+            // Real recipients are bcc'd, so the To is only the copy we keep. It
+            // has to be an address Email Routing delivers, or that copy goes
+            // nowhere.
+            to: 'team@purduehackers.com',
             bcc: recipients,
             subject,
             text,
