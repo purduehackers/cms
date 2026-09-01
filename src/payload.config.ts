@@ -91,7 +91,7 @@ export default buildConfig({
       // is on mail.; replies go back to the address people actually write to.
       defaultFromAddress: 'events@mail.purduehackers.com',
       defaultFromName: 'Purdue Hackers',
-      defaultReplyTo: 'events@purduehackers.com',
+      defaultReplyTo: 'team@purduehackers.com',
       accountId: process.env.CLOUDFLARE_ACCOUNT_ID || '',
       apiToken: process.env.CLOUDFLARE_API_TOKEN || '',
     }),

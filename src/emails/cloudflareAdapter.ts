@@ -24,8 +24,8 @@ import type { EmailAdapter, SendEmailOptions } from 'payload'
  * answer, not an account-level one: it reads like the product is switched off.
  *
  * Because the sender therefore lives on a subdomain nobody reads mail at,
- * `defaultReplyTo` exists to point replies back at the routed inbox. Without it
- * every reply to an event blast lands somewhere unattended.
+ * `defaultReplyTo` exists to point replies at an address Email Routing actually
+ * delivers. Without it every reply to an event blast lands somewhere unattended.
  */
 
 const API_BASE = 'https://api.cloudflare.com/client/v4'
