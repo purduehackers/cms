@@ -402,9 +402,17 @@ export const Events: CollectionConfig = {
       },
     ] satisfies CollectionBeforeChangeHook<Event>[],
     afterChange: [
-      async ({ doc, req, context }) => {
+      async ({ doc, previousDoc, operation, req, context }) => {
+        // Only on the false→true transition, never on a `send` that is merely
+        // still true. A blast that fails leaves the flag set, and every later
+        // save of the event — an editor fixing a typo, the Discord bot appending
+        // a photo to images[] — would otherwise re-attempt it. Re-sending is
+        // asked for by re-checking the box, not by touching the event.
+        const justRequested =
+          operation === 'create' ? Boolean(doc?.send) : Boolean(doc?.send) && !previousDoc?.send
+
         // Skip sending email if conditions not met
-        if (!doc?.send || context?.skipEmailSend) {
+        if (!justRequested || context?.skipEmailSend) {
           console.log('send skipped')
           return doc
         }
