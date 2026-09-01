@@ -34,16 +34,17 @@ For local dev against a file-backed SQLite, set `TURSO_DATABASE_URL=file:./dev.d
 
 See `.env.example`. Required for production:
 
-| Variable                 | Purpose                                  |
-| ------------------------ | ---------------------------------------- |
-| `PAYLOAD_SECRET`         | Payload JWT/session signing              |
-| `TURSO_DATABASE_URL`     | `libsql://…turso.io` connection URL      |
-| `TURSO_AUTH_TOKEN`       | Turso DB auth token                      |
-| `BLOB_READ_WRITE_TOKEN`  | Vercel Blob token (auto-set on Vercel)   |
-| `RESEND_API_KEY`         | Resend API key for transactional email   |
-| `SENTRY_DSN`             | Server-side Sentry DSN                   |
-| `NEXT_PUBLIC_SENTRY_DSN` | Client-side Sentry DSN                   |
-| `SENTRY_AUTH_TOKEN`      | Source-map upload token (Vercel CI only) |
+| Variable                 | Purpose                                            |
+| ------------------------ | -------------------------------------------------- |
+| `PAYLOAD_SECRET`         | Payload JWT/session signing                        |
+| `TURSO_DATABASE_URL`     | `libsql://…turso.io` connection URL                |
+| `TURSO_AUTH_TOKEN`       | Turso DB auth token                                |
+| `BLOB_READ_WRITE_TOKEN`  | Vercel Blob token (auto-set on Vercel)             |
+| `CLOUDFLARE_API_TOKEN`   | Cloudflare token; needs Account:Email Sending:Edit |
+| `CLOUDFLARE_ACCOUNT_ID`  | Cloudflare account the sending domain lives in     |
+| `SENTRY_DSN`             | Server-side Sentry DSN                             |
+| `NEXT_PUBLIC_SENTRY_DSN` | Client-side Sentry DSN                             |
+| `SENTRY_AUTH_TOKEN`      | Source-map upload token (Vercel CI only)           |
 
 ## Database
 

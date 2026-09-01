@@ -1,5 +1,4 @@
 import { sqliteAdapter } from '@payloadcms/db-sqlite'
-import { resendAdapter } from '@payloadcms/email-resend'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import * as Sentry from '@sentry/nextjs'
@@ -17,6 +16,7 @@ import { Rsvps } from './collections/Rsvps'
 import { ServiceAccounts } from './collections/ServiceAccounts'
 import { Shelter } from './collections/Shelter'
 import { Users } from './collections/Users'
+import { cloudflareAdapter } from './emails/cloudflareAdapter'
 import { plugins } from './plugins'
 
 const filename = fileURLToPath(import.meta.url)
@@ -86,10 +86,14 @@ export default buildConfig({
     }),
   ],
   email: wrapAdapterWithSentry(
-    resendAdapter({
-      defaultFromAddress: 'events@purduehackers.com',
+    cloudflareAdapter({
+      // Cloudflare sends only from an onboarded subdomain, so the visible sender
+      // is on mail.; replies go back to the address people actually write to.
+      defaultFromAddress: 'events@mail.purduehackers.com',
       defaultFromName: 'Purdue Hackers',
-      apiKey: process.env.RESEND_API_KEY || '',
+      defaultReplyTo: 'events@purduehackers.com',
+      accountId: process.env.CLOUDFLARE_ACCOUNT_ID || '',
+      apiToken: process.env.CLOUDFLARE_API_TOKEN || '',
     }),
   ),
   cors: allowedOrigins,
