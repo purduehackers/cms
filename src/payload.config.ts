@@ -7,6 +7,7 @@ import { buildConfig, type EmailAdapter } from 'payload'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
+import { hasAnyRoles } from './collections/auth-utils'
 import { Emails } from './collections/Emails'
 import { Events } from './collections/Events'
 import { HackNightSessions } from './collections/HackNightSessions'
@@ -83,6 +84,15 @@ export default buildConfig({
     vercelBlobStorage({
       collections: { media: true },
       token: process.env.BLOB_READ_WRITE_TOKEN || '',
+      // Uploads go straight from the client to Blob storage. A request that
+      // carries the file through this app instead is capped at Vercel's 4.5MB
+      // function body limit, which silently rejected most phone photos the bot
+      // tried to archive — a majority of some hack nights.
+      clientUploads: {
+        // Matched to this collection's create access: anyone who could not
+        // create the media document has no business minting an upload token.
+        access: ({ req }) => hasAnyRoles('editor', 'wack_hacker')({ req }) === true,
+      },
     }),
   ],
   email: wrapAdapterWithSentry(
