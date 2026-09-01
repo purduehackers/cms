@@ -5,7 +5,8 @@ declare global {
       TURSO_DATABASE_URL: string
       TURSO_AUTH_TOKEN: string
       BLOB_READ_WRITE_TOKEN: string
-      RESEND_API_KEY: string
+      CLOUDFLARE_API_TOKEN: string
+      CLOUDFLARE_ACCOUNT_ID: string
       SENTRY_DSN: string
       NEXT_PUBLIC_SENTRY_DSN: string
       EMAIL_ASSETS_URL?: string
