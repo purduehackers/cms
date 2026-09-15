@@ -268,7 +268,7 @@ export interface Event {
   published: boolean;
   eventType: string;
   start: string;
-  end?: string | null;
+  end: string;
   location_name?: string | null;
   location_url?: string | null;
   stats?:

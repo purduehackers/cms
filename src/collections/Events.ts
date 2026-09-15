@@ -259,7 +259,7 @@ export const Events: CollectionConfig = {
     {
       name: 'end',
       type: 'date',
-      required: false,
+      required: true,
       admin: {
         date: {
           pickerAppearance: 'dayAndTime',

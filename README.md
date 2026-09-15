@@ -64,6 +64,10 @@ Add `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` to Vercel env (`vercel env add`)
 - Apply migrations: `bun run migrate`
 - The initial baseline lives at `src/migrations/20260421_050103_initial.ts`.
 
+The `require_event_end_time` migration makes `events.end` required. If existing
+events have no end time, it stops before changing the schema and lists their IDs.
+Enter their actual end times before rerunning; never estimate or backfill a default duration.
+
 The build runs migrations via the `ci` script: `payload migrate && bun run build`. Set Vercel's build command to `bun run ci`.
 
 ## Deploy
