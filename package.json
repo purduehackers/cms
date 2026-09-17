@@ -56,5 +56,8 @@
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"
+  },
+  "patchedDependencies": {
+    "payload@3.83.0": "patches/payload@3.83.0.patch"
   }
 }

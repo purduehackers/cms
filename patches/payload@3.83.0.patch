@@ -1,0 +1,56 @@
+diff --git a/dist/uploads/fetchAPI-multipart/isEligibleRequest.js b/dist/uploads/fetchAPI-multipart/isEligibleRequest.js
+index f4c12eec3f6df6b37957a8ac0d5a9e32ce1a8fa1..6a3b162efbf5a5a52a66261d5b9512819e5386b6 100644
+--- a/dist/uploads/fetchAPI-multipart/isEligibleRequest.js
++++ b/dist/uploads/fetchAPI-multipart/isEligibleRequest.js
+@@ -9,7 +9,7 @@ const UNACCEPTABLE_METHODS = new Set([
+     'TRACE'
+ ]);
+ const hasBody = (req)=>{
+-    return Boolean(req.headers.get('transfer-encoding') || req.headers.get('content-length') && req.headers.get('content-length') !== '0');
++    return Boolean(req.body);
+ };
+ const hasAcceptableMethod = (req)=>!UNACCEPTABLE_METHODS.has(req.method);
+ const hasAcceptableContentType = (req)=>{
+diff --git a/dist/utilities/addDataAndFileToRequest.js b/dist/utilities/addDataAndFileToRequest.js
+index 70707e01d842d471b9d2134262595bee7e4a25a9..fc9bea52f052c8ec21ea415bc91ddb49b4925a3c 100644
+--- a/dist/utilities/addDataAndFileToRequest.js
++++ b/dist/utilities/addDataAndFileToRequest.js
+@@ -10,7 +10,6 @@ import { processMultipartFormdata } from '../uploads/fetchAPI-multipart/index.js
+         'PUT'
+     ].includes(method.toUpperCase()) && body) {
+         const [contentType] = (headers.get('Content-Type') || '').split(';', 1);
+-        const bodyByteSize = parseInt(req.headers.get('Content-Length') || '0', 10);
+         if (contentType === 'application/json') {
+             try {
+                 const text = await req.text?.();
+@@ -25,7 +24,8 @@ import { processMultipartFormdata } from '../uploads/fetchAPI-multipart/index.js
+                 req.payload.logger.error(error);
+                 throw error;
+             }
+-        } else if (bodyByteSize && contentType?.includes('multipart/')) {
++        // Fetch requests may carry a complete, chunked body without Content-Length.
++        } else if (contentType?.includes('multipart/')) {
+             const { error, fields, files } = await processMultipartFormdata({
+                 options: {
+                     ...payload.config.bodyParser || {},
+@@ -80,10 +80,19 @@ import { processMultipartFormdata } from '../uploads/fetchAPI-multipart/index.js
+                     }
+                     throw new APIError('Expected response from the upload handler.');
+                 }
++                // Storage adapters can turn failed reads into empty 204 responses.
++                // Do not pass those to image-size as if they were uploaded files.
++                if (!response.ok || response.status === 204) {
++                    throw new APIError(`Could not read the uploaded file from storage (status ${response.status}).`, 502);
++                }
++                const data = Buffer.from(await response.arrayBuffer());
++                if (typeof size === 'number' && data.length !== size) {
++                    throw new APIError(`Incomplete uploaded file from storage: expected ${size} bytes, received ${data.length}.`, 502);
++                }
+                 req.file = {
+                     name: filename,
+                     clientUploadContext,
+-                    data: Buffer.from(await response.arrayBuffer()),
++                    data,
+                     mimetype: response.headers.get('Content-Type') || mimeType,
+                     size
+                 };
