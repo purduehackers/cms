@@ -277,6 +277,29 @@ export const Events: CollectionConfig = {
       required: false,
     },
     {
+      name: 'luma_url',
+      type: 'text',
+      label: 'Luma URL',
+      required: false,
+      validate: (value: string) => {
+        if (!value) return true; // allow empty since `required: false`
+        try {
+          const url = new URL(value)
+          if (url.protocol !== 'https:') {
+            return 'Enter a complete URL beginning with https://.'
+          }
+        } catch {
+          return 'Enter a valid URL.'
+        }
+        return true
+      },
+      admin: {
+        description:
+          "Set this only for events which require RSVP through Luma to attend. When set, the events site's RSVP feature will be disabled and it will link to the Luma event instead.",
+        placeholder: 'https://luma.com/your-event',
+      },
+    },
+    {
       name: 'stats',
       type: 'array',
       fields: [

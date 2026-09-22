@@ -271,6 +271,10 @@ export interface Event {
   end: string;
   location_name?: string | null;
   location_url?: string | null;
+  /**
+   * Set this only for events which require RSVP through Luma to attend. When set, the events site's RSVP feature will be disabled and it will link to the Luma event instead.
+   */
+  luma_url?: string | null;
   stats?:
     | {
         data: string;
@@ -777,6 +781,7 @@ export interface EventsSelect<T extends boolean = true> {
   end?: T;
   location_name?: T;
   location_url?: T;
+  luma_url?: T;
   stats?:
     | T
     | {

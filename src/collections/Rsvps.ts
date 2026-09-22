@@ -170,6 +170,18 @@ export const Rsvps: CollectionConfig = {
       async ({ data, req, operation }) => {
         // One active RSVP per (event, email); a cancelled one may re-RSVP
         if (operation !== 'create' || !data?.email || !data?.event) return data
+        const eventId = typeof data.event === 'object' ? data.event.id : data.event
+        const eventDoc = await req.payload.findByID({
+          collection: 'events',
+          id: eventId,
+          depth: 0,
+          overrideAccess: true,
+          req,
+        })
+        if (eventDoc.luma_url) {
+          throw new APIError('Registration for this event is handled through Luma.', 400)
+        }
+
         const existing = await req.payload.find({
           collection: 'rsvps',
           where: {
