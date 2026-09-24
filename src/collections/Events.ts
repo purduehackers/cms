@@ -268,11 +268,13 @@ export const Events: CollectionConfig = {
     },
     {
       name: 'location_name',
+      label: 'Location name',
       type: 'text',
       required: false,
     },
     {
       name: 'location_url',
+      label: 'Location URL',
       type: 'text',
       required: false,
     },
