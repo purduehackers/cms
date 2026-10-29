@@ -81,4 +81,4 @@ vercel deploy --prod
 ## Notes
 
 - `strictNullChecks` is off to keep the ported hook code compiling. Treat nullable fields defensively in new code.
-- The MCP plugin registers a `payload-mcp-api-keys` auth collection automatically — role-based access helpers in `src/collections/auth-utils.ts` ignore non-role-bearing user types.
+- MCP at `/api/mcp` exposes collection reads and writes. Admins issue keys under **MCP → API Keys**, linked to a service account. Enable only the required operations; the account's roles and revocation still apply.

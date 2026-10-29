@@ -10,6 +10,7 @@ import * as Sentry from '@sentry/nextjs'
 import type { Plugin } from 'payload'
 
 import type { Event, HackNightSession, Microgrant, Shelter } from '@/payload-types'
+import { isAdmin } from '@/collections/auth-utils'
 
 type SeoDoc = Event | HackNightSession | Shelter | Microgrant
 
@@ -89,12 +90,28 @@ export const plugins: Plugin[] = [
     },
   }),
   mcpPlugin({
+    userCollection: 'service-accounts',
+    overrideApiKeyCollection: (collection) => ({
+      ...collection,
+      access: {
+        admin: isAdmin,
+        create: isAdmin,
+        read: isAdmin,
+        update: isAdmin,
+        delete: isAdmin,
+        unlock: isAdmin,
+      },
+    }),
     collections: {
-      events: { enabled: { find: true } },
-      rsvps: { enabled: { find: true } },
-      'hack-night-sessions': { enabled: { find: true } },
-      shelter: { enabled: { find: true } },
-      microgrants: { enabled: { find: true } },
+      events: { enabled: true },
+      rsvps: { enabled: true },
+      emails: { enabled: true },
+      'hack-night-sessions': { enabled: true },
+      media: { enabled: true },
+      shelter: { enabled: true },
+      microgrants: { enabled: true },
+      users: { enabled: true },
+      'service-accounts': { enabled: true },
     },
   }),
 ]

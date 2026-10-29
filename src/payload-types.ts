@@ -528,7 +528,7 @@ export interface PayloadMcpApiKey {
   /**
    * The user that the API key is associated with.
    */
-  user: number | User;
+  user: number | ServiceAccount;
   /**
    * A useful label for the API key.
    */
@@ -542,30 +542,162 @@ export interface PayloadMcpApiKey {
      * Allow clients to find events.
      */
     find?: boolean | null;
+    /**
+     * Allow clients to create events.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update events.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete events.
+     */
+    delete?: boolean | null;
   };
   rsvps?: {
     /**
      * Allow clients to find rsvps.
      */
     find?: boolean | null;
+    /**
+     * Allow clients to create rsvps.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update rsvps.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete rsvps.
+     */
+    delete?: boolean | null;
+  };
+  emails?: {
+    /**
+     * Allow clients to find emails.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create emails.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update emails.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete emails.
+     */
+    delete?: boolean | null;
   };
   hackNightSessions?: {
     /**
      * Allow clients to find hack-night-sessions.
      */
     find?: boolean | null;
+    /**
+     * Allow clients to create hack-night-sessions.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update hack-night-sessions.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete hack-night-sessions.
+     */
+    delete?: boolean | null;
+  };
+  media?: {
+    /**
+     * Allow clients to find media.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create media.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update media.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete media.
+     */
+    delete?: boolean | null;
   };
   shelter?: {
     /**
      * Allow clients to find shelter.
      */
     find?: boolean | null;
+    /**
+     * Allow clients to create shelter.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update shelter.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete shelter.
+     */
+    delete?: boolean | null;
   };
   microgrants?: {
     /**
      * Allow clients to find microgrants.
      */
     find?: boolean | null;
+    /**
+     * Allow clients to create microgrants.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update microgrants.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete microgrants.
+     */
+    delete?: boolean | null;
+  };
+  users?: {
+    /**
+     * Allow clients to find users.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create users.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update users.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete users.
+     */
+    delete?: boolean | null;
+  };
+  serviceAccounts?: {
+    /**
+     * Allow clients to find service-accounts.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create service-accounts.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update service-accounts.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete service-accounts.
+     */
+    delete?: boolean | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -927,26 +1059,73 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
     | T
     | {
         find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
       };
   rsvps?:
     | T
     | {
         find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  emails?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
       };
   hackNightSessions?:
     | T
     | {
         find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  media?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
       };
   shelter?:
     | T
     | {
         find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
       };
   microgrants?:
     | T
     | {
         find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  users?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  serviceAccounts?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
       };
   updatedAt?: T;
   createdAt?: T;
