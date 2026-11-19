@@ -259,7 +259,7 @@ export interface Event {
   id: number;
   name: string;
   /**
-   * Unique URL-friendly slug. Required but it will attempt to autogenerate if you submit empty.
+   * Unique URL-friendly slug. Hack Night slugs must be a version number (e.g. 1.2.3). Attempts to autogenerate when empty.
    */
   slug?: string | null;
   /**

@@ -1,6 +1,6 @@
 import type {
   CollectionAfterChangeHook,
-  CollectionBeforeChangeHook,
+  CollectionBeforeValidateHook,
   CollectionConfig,
   PayloadRequest,
   TextFieldValidation,
@@ -9,6 +9,11 @@ import { hasAnyRoles, isEditor } from './auth-utils'
 import { renderEmailTemplate } from '@/emails/EmailTemplate'
 import { formatEventStart } from '@/emails/format'
 import { Event } from '@/payload-types'
+
+// Semantic Versioning 2.0.0, including optional prerelease and build identifiers.
+// From <https://semver.org/>
+const semverPattern =
+  /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
 
 export function createSlugFromName(name: string, eventType?: string) {
   let slug = name
@@ -174,8 +179,8 @@ export const Events: CollectionConfig = {
     group: 'Events',
   },
   access: {
-    read: hasAnyRoles('viewer', 'events_website'),
-    readVersions: hasAnyRoles('viewer', 'events_website'),
+    read: hasAnyRoles('viewer', 'events_website', 'hack_night_dashboard'),
+    readVersions: hasAnyRoles('viewer', 'events_website', 'hack_night_dashboard'),
     create: isEditor,
     update: isEditor,
     delete: isEditor,
@@ -195,6 +200,12 @@ export const Events: CollectionConfig = {
         slug: Parameters<TextFieldValidation>[0],
         options: Parameters<TextFieldValidation>[1],
       ) => {
+        const eventType =
+          (options.siblingData as Partial<Event>)?.eventType ??
+          (options.data as Partial<Event>)?.eventType
+        if (eventType === 'hack-night' && (typeof slug !== 'string' || !semverPattern.test(slug))) {
+          return 'Hack Night slugs must be a valid semantic version, such as 7.10 or 1.2.3'
+        }
         if (!slug) return true
 
         const id = options?.id
@@ -222,7 +233,7 @@ export const Events: CollectionConfig = {
       },
       admin: {
         description:
-          'Unique URL-friendly slug. Required but it will attempt to autogenerate if you submit empty.',
+          'Unique URL-friendly slug. Hack Night slugs must be a version number (e.g. 1.2.3). Attempts to autogenerate when empty.',
       },
     },
     {
@@ -284,7 +295,7 @@ export const Events: CollectionConfig = {
       label: 'Luma URL',
       required: false,
       validate: (value: string) => {
-        if (!value) return true; // allow empty since `required: false`
+        if (!value) return true // allow empty since `required: false`
         try {
           const url = new URL(value)
           if (url.protocol !== 'https:') {
@@ -414,7 +425,7 @@ export const Events: CollectionConfig = {
     },
   ],
   hooks: {
-    beforeChange: [
+    beforeValidate: [
       async ({ originalDoc, data }) => {
         const name = data?.name || originalDoc?.name
         const eventType = data?.eventType || originalDoc?.eventType
@@ -427,7 +438,7 @@ export const Events: CollectionConfig = {
           slug: createSlugFromName(name, eventType),
         }
       },
-    ] satisfies CollectionBeforeChangeHook<Event>[],
+    ] satisfies CollectionBeforeValidateHook<Event>[],
     afterChange: [
       async ({ doc, previousDoc, operation, req, context }) => {
         // Only on the false→true transition, never on a `send` that is merely
