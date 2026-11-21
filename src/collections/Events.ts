@@ -10,10 +10,10 @@ import { renderEmailTemplate } from '@/emails/EmailTemplate'
 import { formatEventStart } from '@/emails/format'
 import { Event } from '@/payload-types'
 
-// Semantic Versioning 2.0.0, including optional prerelease and build identifiers.
+// Semantic Versioning 2.0.0 with an optional patch number, prerelease, and build identifiers.
 // From <https://semver.org/>
 const semverPattern =
-  /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
+  /^(0|[1-9]\d*)\.(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
 
 export function createSlugFromName(name: string, eventType?: string) {
   let slug = name
@@ -204,7 +204,7 @@ export const Events: CollectionConfig = {
           (options.siblingData as Partial<Event>)?.eventType ??
           (options.data as Partial<Event>)?.eventType
         if (eventType === 'hack-night' && (typeof slug !== 'string' || !semverPattern.test(slug))) {
-          return 'Hack Night slugs must be a valid semantic version, such as 7.10 or 1.2.3'
+          return 'Hack Night slugs must be a valid version, such as 7.10 or 1.2.3'
         }
         if (!slug) return true
 
@@ -233,7 +233,7 @@ export const Events: CollectionConfig = {
       },
       admin: {
         description:
-          'Unique URL-friendly slug. Hack Night slugs must be a version number (e.g. 1.2.3). Attempts to autogenerate when empty.',
+          'Unique URL-friendly slug. Hack Night slugs must be a version number (e.g. 7.10 or 1.2.3). Attempts to autogenerate when empty.',
       },
     },
     {
